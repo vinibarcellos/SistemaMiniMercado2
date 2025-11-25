@@ -1,0 +1,61 @@
+-- 1. Cria o Banco de Dados (se não existir)
+CREATE DATABASE IF NOT EXISTS mercado2amigos;
+
+-- 2. Seleciona o Banco para usar
+USE mercado2amigos;
+
+-- 3. Cria a tabela CLIENTE (Pai)
+CREATE TABLE cliente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    categoria VARCHAR(3)
+) ENGINE=InnoDB;
+
+-- 4. Cria as tabelas filhas de CLIENTE
+CREATE TABLE cliente_pf (
+    cliente_id INT UNIQUE,
+    cpf VARCHAR(11) NOT NULL,
+    CONSTRAINT fk_cliente_pf_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE cliente_pj (
+    cliente_id INT UNIQUE,
+    cnpj VARCHAR(14) NOT NULL,
+    CONSTRAINT fk_cliente_pj_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(id)
+) ENGINE=InnoDB;
+
+-- 5. Cria a tabela PRODUTO (Atualizada com cod_barras e custo)
+CREATE TABLE produto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cod_barras VARCHAR(13) NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    custo_medio DECIMAL(10,2) NOT NULL,
+    qtd_estoque INT NOT NULL -- Note que no Java chamamos de 'qtdEstoque'
+) ENGINE=InnoDB;
+
+-- 6. Cria tabela auxiliar
+CREATE TABLE desconto_fidelidade (
+    categoria VARCHAR(3) PRIMARY KEY,
+    desconto DECIMAL(10,2) NOT NULL
+) ENGINE=InnoDB;
+
+-- 7. Cria tabela VENDA (Depende de Cliente)
+CREATE TABLE venda (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    desconto DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_venda_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(id)
+) ENGINE=InnoDB;
+
+-- 8. Cria tabela VENDA_ITENS (Depende de Venda)
+CREATE TABLE venda_itens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    venda_id INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    quantidade INT NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_venda_itens_venda FOREIGN KEY (venda_id) REFERENCES venda(id)
+) ENGINE=InnoDB;
