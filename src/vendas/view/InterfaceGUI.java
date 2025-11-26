@@ -10,20 +10,20 @@ import java.awt.*;
 import java.util.List;
 
 public class InterfaceGUI extends JFrame {
-    // Agora usamos a Interface, não direto o DAO (Padrão Enterprise)
+    // Agora usamos a Interface
     private IProdutoService service;
 
     private JTable tabelaProdutos;
     private DefaultTableModel modeloTabela;
 
-    // Campos do Formulário (Atualizados com os novos dados do SQL)
+    // Campos do Formulário
     private JTextField txtId, txtNome, txtCodBarras, txtPreco, txtCusto, txtQtd;
 
     public InterfaceGUI() {
         // Inicializa a implementação do serviço
         this.service = new ProdutoService();
 
-        setTitle("Sistema Mercado 2 Amigos - v3.0 Enterprise");
+        setTitle("Sistema Mercado 2 Amigos");
         setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Centraliza
@@ -36,11 +36,11 @@ public class InterfaceGUI extends JFrame {
         add(abas);
     }
 
-    // --- ABA 1: FORMULÁRIO ---
+    // FORMULÁRIO
     private JPanel criarPainelCadastro() {
         JPanel painel = new JPanel(new BorderLayout());
 
-        // Grid com 6 linhas para acomodar os novos campos
+        // Grid
         JPanel form = new JPanel(new GridLayout(6, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -56,7 +56,7 @@ public class InterfaceGUI extends JFrame {
         txtNome = new JTextField();
         form.add(txtNome);
 
-        // 3. Código de Barras (Novo)
+        // 3. Código de Barras
         form.add(new JLabel("Código de Barras (EAN):"));
         txtCodBarras = new JTextField();
         form.add(txtCodBarras);
@@ -66,7 +66,7 @@ public class InterfaceGUI extends JFrame {
         txtPreco = new JTextField();
         form.add(txtPreco);
 
-        // 5. Custo Médio (Novo)
+        // 5. Custo Médio
         form.add(new JLabel("Custo Médio (R$):"));
         txtCusto = new JTextField();
         form.add(txtCusto);
@@ -76,14 +76,14 @@ public class InterfaceGUI extends JFrame {
         txtQtd = new JTextField();
         form.add(txtQtd);
 
-        // Botões
+        // Botoes
         JPanel botoes = new JPanel(new FlowLayout());
         JButton btnSalvar = new JButton("Salvar");
         JButton btnEditar = new JButton("Editar");
         JButton btnExcluir = new JButton("Excluir");
         JButton btnLimpar = new JButton("Limpar");
 
-        // Ações
+        // Açoes
         btnSalvar.addActionListener(e -> acaoSalvar());
         btnEditar.addActionListener(e -> acaoEditar());
         btnExcluir.addActionListener(e -> acaoExcluir());
@@ -100,19 +100,38 @@ public class InterfaceGUI extends JFrame {
         return painel;
     }
 
-    // --- ABA 2: TABELA ---
+    // TABELA
     private JPanel criarPainelRelatorio() {
         JPanel painel = new JPanel(new BorderLayout());
 
-        // Colunas da tabela
+        // 1. Painel de Busca
+        JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField txtBusca = new JTextField(20);
+        JButton btnBuscar = new JButton("Buscar por Nome");
+        JButton btnLimparBusca = new JButton("Ver Todos");
+
+        painelBusca.add(new JLabel("Pesquisar:"));
+        painelBusca.add(txtBusca);
+        painelBusca.add(btnBuscar);
+        painelBusca.add(btnLimparBusca);
+
+        // Ações da Busca
+        btnBuscar.addActionListener(e -> pesquisarProduto(txtBusca.getText()));
+        btnLimparBusca.addActionListener(e -> {
+            txtBusca.setText("");
+            carregarTabela(); // Recarrega tudo
+        });
+
+        // 2. Tabela
         String[] colunas = {"ID", "Nome", "Cód. Barras", "Preço", "Custo", "Qtd"};
         modeloTabela = new DefaultTableModel(colunas, 0);
         tabelaProdutos = new JTable(modeloTabela);
 
-        // Evento: Clicar na linha preenche o formulário da outra aba
+        // Evento de clique na tabela
         tabelaProdutos.getSelectionModel().addListSelectionListener(e -> {
             int linha = tabelaProdutos.getSelectedRow();
             if (linha >= 0) {
+                // Preenche os campos da outra aba com os dados da linha clicada
                 txtId.setText(modeloTabela.getValueAt(linha, 0).toString());
                 txtNome.setText(modeloTabela.getValueAt(linha, 1).toString());
                 txtCodBarras.setText(modeloTabela.getValueAt(linha, 2).toString());
@@ -122,16 +141,11 @@ public class InterfaceGUI extends JFrame {
             }
         });
 
-        JButton btnAtualizar = new JButton("Atualizar Lista");
-        btnAtualizar.addActionListener(e -> carregarTabela());
-
+        painel.add(painelBusca, BorderLayout.NORTH); // Adiciona a busca no topo
         painel.add(new JScrollPane(tabelaProdutos), BorderLayout.CENTER);
-        painel.add(btnAtualizar, BorderLayout.SOUTH);
 
         return painel;
     }
-
-    // --- LÓGICA (Conversa com o Service) ---
 
     private void carregarTabela() {
         modeloTabela.setRowCount(0);
@@ -155,7 +169,7 @@ public class InterfaceGUI extends JFrame {
     private void acaoSalvar() {
         try {
             Produto p = montarProdutoDoFormulario();
-            service.salvar(p); // Chama o Service, não o DAO direto
+            service.salvar(p);
 
             JOptionPane.showMessageDialog(this, "Produto salvo com sucesso!");
             limparCampos();
@@ -208,12 +222,11 @@ public class InterfaceGUI extends JFrame {
     private Produto montarProdutoDoFormulario() {
         String nome = txtNome.getText();
         String barras = txtCodBarras.getText();
-        // Tratamento para aceitar vírgula ou ponto no preço
+        // Tratamento para aceitar virgula ou ponto no preço
         double preco = Double.parseDouble(txtPreco.getText().replace(",", "."));
         double custo = Double.parseDouble(txtCusto.getText().replace(",", "."));
         int qtd = Integer.parseInt(txtQtd.getText());
 
-        // Construtor correspondente à classe Produto atualizada
         return new Produto(0, nome, barras, preco, custo, qtd);
     }
 
@@ -224,5 +237,30 @@ public class InterfaceGUI extends JFrame {
         txtPreco.setText("");
         txtCusto.setText("");
         txtQtd.setText("");
+    }
+
+    private void pesquisarProduto(String termo) {
+        if (termo.isEmpty()) {
+            carregarTabela(); // Se estiver vazio, carrega tudo
+            return;
+        }
+
+        modeloTabela.setRowCount(0); // Limpa tabela
+        try {
+            // Chama o service
+            List<Produto> lista = service.buscarPorNome(termo);
+
+            for (Produto p : lista) {
+                modeloTabela.addRow(new Object[]{
+                        p.getId(), p.getNome(), p.getCodBarras(), p.getPreco(), p.getCustoMedio(), p.getQtdEstoque()
+                });
+            }
+
+            if (lista.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Nenhum produto encontrado com esse nome.");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro na busca: " + e.getMessage());
+        }
     }
 }

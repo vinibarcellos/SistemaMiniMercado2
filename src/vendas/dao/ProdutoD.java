@@ -9,7 +9,6 @@ import java.util.List;
 public class ProdutoD {
 
     public void salvar(Produto p) {
-        // SQL atualizado com as novas colunas
         String sql = "INSERT INTO produto (nome, cod_barras, preco, custo_medio, qtd_estoque) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = Conexao.getConnection();

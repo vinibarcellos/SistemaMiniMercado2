@@ -73,5 +73,36 @@ public class ProdutoService implements IProdutoService {
             throw new RuntimeException("Erro ao listar produtos: " + e.getMessage());
         }
         return lista;
+
+
+    }
+
+    @Override
+    public List<Produto> buscarPorNome(String nome) {
+        // O operador LIKE com % permite buscar partes do nome (ex: "Arr" acha "Arroz")
+        String sql = "SELECT * FROM produto WHERE nome LIKE ?";
+        List<Produto> lista = new ArrayList<>();
+
+        try (Connection conn = Conexao.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + nome + "%"); // Adiciona % antes e depois
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Produto p = new Produto();
+                    p.setId(rs.getInt("id"));
+                    p.setNome(rs.getString("nome"));
+                    p.setCodBarras(rs.getString("cod_barras"));
+                    p.setPreco(rs.getDouble("preco"));
+                    p.setCustoMedio(rs.getDouble("custo_medio"));
+                    p.setQtdEstoque(rs.getInt("qtd_estoque"));
+                    lista.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar produto por nome: " + e.getMessage());
+        }
+        return lista;
     }
 }

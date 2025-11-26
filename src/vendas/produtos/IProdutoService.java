@@ -7,4 +7,5 @@ public interface IProdutoService {
     void atualizar(Produto produto);
     void excluir(int id);
     List<Produto> listarTodos();
+    List<Produto> buscarPorNome(String nome);
 }
