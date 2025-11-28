@@ -1,0 +1,9 @@
+ID    | PRODUTO                        | QUANTIDADE
+-------------------------------------------------
+1     | banana                         | 20
+3     | oi professor                   | 12
+4     | Banana Asiática                | 22
+5     | Laranja                        | 20
+6     | Carrocho Quente                | 1000
+-------------------------------------------------
+Total de itens listados: 5
